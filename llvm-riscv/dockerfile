@@ -1,0 +1,17 @@
+FROM ubuntu:18.04
+MAINTAINER BeMg
+
+RUN apt-get update && apt-get install -y git autoconf automake autotools-dev subversion curl libmpc-dev libmpfr-dev libgmp-dev gawk build-essential bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev python-dev cmake ninja-build libxml2-dev python-pygments python-yaml g++ cmake
+RUN mkdir risc-v && export RISCV=/risc-v
+RUN git clone --recursive https://github.com/riscv/riscv-gnu-toolchain && cd riscv-gnu-toolchain && \
+    ./configure --prefix=$RISCV --with-arch=rv64imac --with-abi=lp64 && make -j4 && cd /
+RUN git clone https://github.com/BeMg/riscv-llvm.git && \
+    export REV=326957 && svn co http://llvm.org/svn/llvm-project/llvm/trunk@$REV llvm && \
+    cd llvm/tools && svn co http://llvm.org/svn/llvm-project/cfe/trunk@$REV clang && cd .. && \
+    for P in ../riscv-llvm/*.patch; do patch -p1 < $P; done && \
+    for P in ../riscv-llvm/clang/*.patch; do patch -d tools/clang -p1 < $P; done && \
+    mkdir build && cd build && \
+    cmake -G Ninja -DCMAKE_BUILD_TYPE="Debug" -mfloat-abi=soft -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True -DLLVM_OPTIMIZED_TABLEGEN=True -DLLVM_BUILD_TESTS=True -DDEFAULT_SYSROOT="$RISCV/riscv64-unknown-elf" -DGCC_INSTALL_PREFIX="$RISCV" -DLLVM_DEFAULT_TARGET_TRIPLE="riscv64-unknown-elf" -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="RISCV" ../ && \
+    cmake --build .
+RUN cp /riscv-gnu-toolchain/build-gcc-newlib-stage2/riscv64-unknown-elf/libgcc/*.o /risc-v/riscv64-unknown-elf/lib && \
+    cp /riscv-gnu-toolchain/build-gcc-newlib-stage2/riscv64-unknown-elf/libgcc/*.a /risc-v/riscv64-unknown-elf/lib
