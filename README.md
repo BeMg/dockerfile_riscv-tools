@@ -8,6 +8,6 @@
 In dir with Dockerfile
 
 ```c
-sudo docker build -t [name for images] --no-cache
+sudo docker build -t [name for images] --no-cache .
 ```
 
