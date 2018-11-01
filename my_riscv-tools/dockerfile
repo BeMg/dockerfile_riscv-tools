@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y git autoconf automake autotools-dev cur
 ENV RISCV /risc-v
 RUN git clone --recursive https://github.com/riscv/riscv-gnu-toolchain && \
     cd riscv-gnu-toolchain && ./configure --prefix=$RISCV && make -j4 && \
-    rm -rf riscv-binutils && git clone https://github.com/BeMg/riscv-bintuils.git riscv-binutils && \
+    rm -rf riscv-binutils && git clone https://github.com/BeMg/riscv-binutils.git riscv-binutils && \
     cd riscv-binutils && ./configure --prefix=$RISCV --target=riscv64-unknown-elf && make -j4 && make install -j4
 RUN git clone https://github.com/riscv/riscv-tools.git 
 RUN cd riscv-tools && git submodule update --init riscv-pk && git submodule update --init riscv-fesvr && rm -rf riscv-isa-sim && git clone https://github.com/BeMg/riscv-isa-sim.git && \
