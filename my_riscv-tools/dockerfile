@@ -10,4 +10,4 @@ RUN git clone --recursive https://github.com/riscv/riscv-gnu-toolchain && \
     cd riscv-binutils && ./configure --prefix=$RISCV --target=riscv64-unknown-elf && make -j4 && make install -j4
 RUN git clone https://github.com/riscv/riscv-tools.git 
 RUN cd riscv-tools && git submodule update --init riscv-pk && git submodule update --init riscv-fesvr && rm -rf riscv-isa-sim && git clone https://github.com/BeMg/riscv-isa-sim.git && \
-     ./build-spike-pk.sh && cd / && rm -rf riscv-tools && echo "export PATH=$PATH:/risc-v/bin" >> ~/.bashrc
+     ./build-spike-pk.sh && echo "export PATH=$PATH:/risc-v/bin" >> ~/.bashrc
