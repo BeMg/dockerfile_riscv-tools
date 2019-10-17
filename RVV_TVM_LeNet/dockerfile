@@ -4,10 +4,10 @@ MAINTAINER BeMg
 RUN apt-get update && apt-get install -y git autoconf python3 python3-dev python3-pip python3-setuptools gcc libtinfo-dev zlib1g-dev build-essential cmake \
     automake autotools-dev curl wget libmpc-dev libmpfr-dev libgmp-dev libusb-1.0-0-dev gawk \
     build-essential bison flex device-tree-compiler texinfo gperf libtool patchutils bc zlib1g-dev device-tree-compiler pkg-config libexpat-dev && mkdir risc-v
-RUN pip3 install requests tqdm numpy 
+RUN pip3 install requests tqdm numpy decorator attrs onnx mxnet
 ENV RISCV /risc-v
 RUN cd ~ && wget https://raw.githubusercontent.com/chentinghao/download_google_drive/master/download_gdrive.py && \
-    python3 download_gdrive.py 1pPhHP6vVE6t9xBj8DHuUIU9DD8G0amEs ~/riscv_toolchain.tar
+    python3 download_gdrive.py 1mB04WHBS55isPPLqn8N3_H0lhjn1El3- ~/riscv_toolchain.tar
 RUN cd ~ && tar -vxf riscv_toolchain.tar && rm riscv_toolchain.tar
 RUN cd ~ && cd riscv-gnu-toolchain && ./configure --prefix=$RISCV --with-arch=rv64gcv --with-abi=lp64 && make -j6
 ENV PATH="/risc-v/bin:${PATH}"
@@ -15,10 +15,10 @@ RUN cd ~ && git clone https://github.com/riscv/riscv-pk.git && \
     cd riscv-pk && mkdir build && cd build && \
     ../configure --prefix=$RISCV --host=riscv64-unknown-elf && \
     make -j4 && make install -j4
-RUN cd ~ && git clone https://github.com/riscv/riscv-isa-sim.git && \
+RUN cd ~ && python3 ~/download_gdrive.py 1FDonXZJtZpT7tMqWXEJ3O2TtunbqsnXN ./riscv-isa-sim.tar && tar -xvf riscv-isa-sim.tar && \
     cd riscv-isa-sim && mkdir build && cd build && \
     ../configure --prefix=$RISCV && make -j4 && make install -j6
-RUN cd ~ && mkdir llvm9 && cd llvm9 && python3 ~/download_gdrive.py 1VVEgpUiVIqQChbW6drkOOPdQmr1czjhJ ./llvm.tar && tar -vxf llvm.tar && mkdir build
+RUN cd ~ && mkdir llvm9 && cd llvm9 && python3 ~/download_gdrive.py 18vi4L4MX_Q29wj2o7lXyIchhJIVkECyH ./llvm.tar && tar -vxf llvm.tar && mkdir build
 RUN cd ~ && cd ./llvm9/build && cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE="Debug" \
   -DBUILD_SHARED_LIBS=True -DLLVM_USE_SPLIT_DWARF=True \
   -DLLVM_TARGETS_TO_BUILD="RISCV" \
@@ -30,3 +30,9 @@ RUN cd ~ && cd ./llvm9/build && cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE="De
   -DCMAKE_INSTALL_PREFIX=../install \
   ../llvm && make -j8
 ENV PATH="~/llvm9/build/bin:${PATH}"
+RUN cd ~ && mkdir TVM && cd TVM && python3 ~/download_gdrive.py 1o-W8-K6KVPtoN30sMXyBzNQV4V1WiHdY ./tvm.tar && tar -vxf tvm.tar && cd tvm && rm -rf build && mkdir build && cd build && \
+    wget https://gist.githubusercontent.com/BeMg/657b2c70fa49aa68913230cec8a18dca/raw/25ba7e5d9bc86fb6ad3947b549101239168af44b/config.cmake && cmake .. && make -j6
+ENV TVM_HOME=/root/TVM/tvm
+ENV PYTHONPATH=$TVM_HOME/python:$TVM_HOME/topi/python:$TVM_HOME/nnvm/python:${PYTHONPATH}
+RUN cd ~ && mkdir DLR && cd DLR && python3 ~/download_gdrive.py 18xe-bqi4WJexHPMxq3-DSSafk5bTZUHG ./DLRlib.tar && tar -vxf DLRlib.tar && mkdir build && mkdir install && cd build && \
+    cmake -DCMAKE_INSTALL_PREFIX=../install ../DLRlib && make -j7 && make install
